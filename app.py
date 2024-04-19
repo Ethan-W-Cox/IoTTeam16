@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, session
+from flask import Flask, render_template, redirect, request
 import firebase_admin
 from firebase_admin import credentials, auth
 
@@ -6,6 +6,8 @@ app = Flask(__name__)
 
 cred = credentials.Certificate("finalproject-89a6e-firebase-adminsdk-7o1n7-0b1800bdde.json")
 firebase_admin.initialize_app(cred)
+
+user_id = ""
 
 @app.route('/')
 def login():
@@ -18,7 +20,7 @@ def authenticate():
 
     try:
         user = auth.get_user_by_email(email)
-        print(user.uid) # Gets the uuid from authenticate
+        user_uuid = user.uid # Gets the uuid from authenticate as a string
         return render_template('landing.html')
     except:
         try:
