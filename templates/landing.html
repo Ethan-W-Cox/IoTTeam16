@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="static/landingStyle.css">
+    <title>AREO ARC</title>
+    <style>
+        .btn {
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+        /* Add styles for the table */
+        table, th, td {
+            border: 1px solid rgb(255, 255, 255);
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+    <h1>AERO ARC</h1>
+    <p style="text-align:center">Please select the direction you are throwing:</p>
+    <div style="text-align:center">
+        <button class="btn" id="N">N</button>
+        <button class="btn" id="S">S</button>
+        <button class="btn" id="E">E</button>
+        <button class="btn" id="W">W</button>
+    </div>
+
+    
+    <p></p>
+    <div style="text-align:center">
+        <button class="btn1" id="run">Collect Data</button>
+    </div>
+    <h2 style="text-align:center">Wind speed over the last 5 seconds</h2>
+    <p id="loading" style="display: none; text-align:center">Please wait while data is being collected...</p>
+    <div class="container">
+        <div class="table-container">
+            <table>
+                <tr>
+                    <th>Time (s)</th>
+                    <th>Wind Speed (m/s)</th>
+                </tr>
+                <tr><td>0.5</td><td></td></tr>
+                <tr><td>1.0</td><td></td></tr>
+                <tr><td>1.5</td><td></td></tr>
+                <tr><td>2.0</td><td></td></tr>
+                <tr><td>2.5</td><td></td></tr>
+                <tr><td>3.0</td><td></td></tr>
+                <tr><td>3.5</td><td></td></tr>
+                <tr><td>4.0</td><td></td></tr>
+                <tr><td>4.5</td><td></td></tr>
+                <tr><td>5.0</td><td></td></tr>
+            </table>
+        </div>
+        <p></p>
+        <div class="data-container">
+            <p></p>
+            <p id="average">Average Wind Speed (m/s): </p>
+            <p id="heading">Heading: </p>
+            <p id="distanceNoWind">Distance Without Wind (meters): </p>
+            <p id="distanceWithWind">Distance With Wind (meters): </p>
+        </div>
+    </div>
+
+    <script>
+        var sum = 0; // sum of wind speeds
+        var average = 0; // average of wind speeds
+        let finalDistance = 0;
+        var windFactor = 0;
+        var d = 0;
+        var heading = 0;
+        var btns = document.getElementsByClassName("btn");
+
+        // Get the buttons
+var btnN = document.getElementById("N");
+var btnS = document.getElementById("S");
+var btnE = document.getElementById("E");
+var btnW = document.getElementById("W");
+var btnRun = document.getElementById("run");
+
+// Initially disable the "Collect Data" button
+btnRun.disabled = true;
+
+// Add event listeners to the direction buttons
+btnN.addEventListener("click", handleDirectionButtonClick);
+btnS.addEventListener("click", handleDirectionButtonClick);
+btnE.addEventListener("click", handleDirectionButtonClick);
+btnW.addEventListener("click", handleDirectionButtonClick);
+
+function handleDirectionButtonClick() {
+    // Remove the "active" class from the currently active button, if there is one
+    var current = document.querySelector(".btn.active");
+    if (current) {
+        current.classList.remove("active");
+    }
+
+    // Add the "active" class to the clicked button
+    this.classList.add("active");
+
+    // Enable the "Collect Data" button
+    btnRun.disabled = false;
+}
+
+// Add event listener to the "Collect Data" button
+btnRun.addEventListener("click", function() {
+    // Check if a direction button is selected
+    if (!document.querySelector(".btn.active")) {
+        // If not, show a popup and return
+        alert("Please select a direction before collecting data.");
+        return;
+    }
+});
+
+        for (var i = 0; i < btns.length; i++) {
+            btns[i].addEventListener("click", function() {
+                var current = document.getElementsByClassName("active");
+                if (current.length > 0) { 
+                    current[0].className = current[0].className.replace(" active", "");
+                }
+                this.className += " active";
+            });
+        }
+
+
+        document.getElementById("run").addEventListener("click", function() {
+            fetch('/run', {method: 'POST'});
+            document.getElementById("run").innerHTML = "Please Wait"; // change button text
+            // Start updating the table
+            fetch('/get_wind_data')
+                .then(response => response.json())
+                .then(windSpeeds => {
+                    // Get the table
+                    var table = document.querySelector('table');
+                    var activeButton = document.querySelector(".btn.active");
+
+                    // Clear the table
+                    while (table.rows.length > 1) {
+                        table.deleteRow(1);
+                    }
+
+                    sum = 0;
+                    // For each wind speed, add a row to the table
+                    for (var i = 0; i < windSpeeds.length; i++) {
+                        sum = sum + parseFloat(windSpeeds[i][1]);
+                        var row = table.insertRow(-1);
+                        var cell1 = row.insertCell(0);
+                        var cell2 = row.insertCell(1);
+                        cell1.innerHTML = i * 0.5;
+                        cell2.innerHTML = windSpeeds[i][1];
+                    }
+                    average = sum / 10.0;
+                    document.getElementById("average").innerHTML = "Average Wind Speed (m/s): " + average.toFixed(2);
+                    document.getElementById("run").innerHTML = "Collect Data"; // change button text
+                    
+                    windFactor = (average / 32.4) * 0.1;
+                    heading = parseFloat(heading);
+                    
+                    if("N" == activeButton.id){
+                        if(heading > 135 && heading < 225){
+                            finalDistance = d * (1+windFactor);
+                        } 
+                        else if ( heading < 45 && heading > 315){
+                            finalDistance = d * (1-windFactor);
+                        }
+                        else{
+                            finalDistance = d;
+                        }
+                    } 
+                    else if("S" == activeButton.id){
+                        if(heading > 135 && heading < 225){
+                            finalDistance = d * (1-windFactor);
+                        } 
+                        else if ( heading < 45 && heading > 315){
+                            finalDistance = d * (1+windFactor);
+                        }
+                        else{
+                            finalDistance = d;
+                        }
+                    }
+                    else if("E" == activeButton.id){
+                        if(heading <=315 && heading >= 225){
+                            finalDistance = d * (1+windFactor);
+                        } else if ( heading >= 45 && heading <= 135){
+                            finalDistance = d * (1-windFactor);
+                        }
+                        else{
+                            finalDistance = d;
+                        }
+                    }
+                    else if("W" == activeButton.id){
+                        if(heading <=315 && heading >= 225){
+                            finalDistance = d * (1-windFactor);
+                        } else if ( heading >= 45 && heading <= 135){
+                            finalDistance = d * (1+windFactor);
+                        }
+                        else{
+                            finalDistance = d;
+                        }
+                    }
+
+                    document.getElementById("distanceWithWind").innerHTML = "Distance With Wind (meters) : " + finalDistance.toFixed(2);
+                })
+            fetch('/get_heading_data')
+                .then(response => response.json())
+                .then(headingFirebase => {
+                    heading = headingFirebase;
+                    document.getElementById("heading").innerHTML = "Heading: " + heading;
+                })
+
+            fetch('/get_distance_data')
+                .then(response => response.json())
+                .then(distance => {
+                    d = distance
+                    document.getElementById("distanceNoWind").innerHTML = "Distance Without Wind (meters) : " + distance.toFixed(2);
+                })
+
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });        
+    </script>
+</body>
+</html>

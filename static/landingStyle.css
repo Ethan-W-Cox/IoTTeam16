@@ -1,0 +1,82 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #464646; /* Dark background */
+    color: #fff; /* White text */
+}
+
+h1 {
+    color: #fff; /* White text */
+    text-align: center;
+    margin-top: 20px;
+}
+
+p {
+    color: #fff; /* White text */
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 10px 0;
+}
+
+.btn, .btn1 {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    color: #ffffff; /* White text on buttons */
+    background-color: #9c089c; /* purple backgroundon buttons*/
+    text-decoration: none;
+    font-size: 15px;
+    line-height: 1.5;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover, .btn1:hover {
+    background-color: #530653; /* Darker purple on hover */
+}
+
+.btn.active {
+    background-color: #530653;
+}
+
+.btn1:disabled {
+    background-color: #cccccc;
+    color: #666666;
+}
+
+table {
+    width: 100%;
+    margin: 20px 0;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 5px;
+    border: 1px solid #ddd;
+    text-align: left;
+    color: #fff; /* White text */
+}
+
+th {
+    background-color: #9c089c;
+    color: white;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+}
+
+.table-container {
+    width: 70%; /* Adjust as needed */
+    margin: 10px; 
+    overflow: auto; /* Enables scrolling */
+    margin-right: 40px;
+}
+
+.data-container {
+    width: 30%; /* Adjust as needed */
+}
+
