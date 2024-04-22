@@ -65,13 +65,14 @@ def get_heading_data():
 
 @app.route('/get_distance_data', methods=['GET'])
 def get_distance_data():
-    distance = 0
-    distanceDataRef = db.reference('/Throw Data/d/')
-    distance = distanceDataRef.get()
+    distance_data = {}
+    distance_data_ref = db.reference('/Throw Data/')
+    distance_data['d'] = distance_data_ref.child('d').get()
+    distance_data['a'] = distance_data_ref.child('a').get()
+    distance_data['b'] = distance_data_ref.child('b').get()
+    distance_data['c'] = distance_data_ref.child('c').get()
 
-    return jsonify(distance)
-
-
+    return jsonify(distance_data)
 
 if __name__ == '__main__':
     app.run(debug=True)

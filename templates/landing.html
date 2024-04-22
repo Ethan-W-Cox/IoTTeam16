@@ -72,6 +72,9 @@
         let finalDistance = 0;
         var windFactor = 0;
         var d = 0;
+        var a = 0;
+        var b = 0;
+        var c = 0;
         var heading = 0;
         var btns = document.getElementsByClassName("btn");
 
@@ -214,8 +217,11 @@ btnRun.addEventListener("click", function() {
             fetch('/get_distance_data')
                 .then(response => response.json())
                 .then(distance => {
-                    d = distance
-                    document.getElementById("distanceNoWind").innerHTML = "Distance Without Wind (meters) : " + distance.toFixed(2);
+                    d = distance.d
+                    a = distance.a // GOT PARABOLA DATA
+                    b = distance.b
+                    c = distance.c
+                    document.getElementById("distanceNoWind").innerHTML = "Distance Without Wind (meters) : " + d.toFixed(2);
                 })
 
                 .catch(error => {
