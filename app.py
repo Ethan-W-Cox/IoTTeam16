@@ -58,7 +58,7 @@ def get_wind_data():
 @app.route('/get_heading_data', methods=['GET'])
 def get_heading_data():
     heading = 0
-    headingDataRef = db.reference('/Wind Direction/Heading/')
+    headingDataRef = db.reference('/Wind Deg/Wind Degree/')
     heading = headingDataRef.get()
 
     return jsonify(heading)
