@@ -67,10 +67,10 @@ def get_heading_data():
 def get_distance_data():
     distance_data = {}
     distance_data_ref = db.reference('/Throw Data/')
-    distance_data['d'] = distance_data_ref.child('d').get()
-    distance_data['a'] = distance_data_ref.child('a').get()
-    distance_data['b'] = distance_data_ref.child('b').get()
-    distance_data['c'] = distance_data_ref.child('c').get()
+    distance_data['d'] = float(distance_data_ref.child('d').get())
+    distance_data['a'] = float(distance_data_ref.child('a').get())
+    distance_data['b'] = float(distance_data_ref.child('b').get())
+    distance_data['c'] = float(distance_data_ref.child('c').get())
 
     return jsonify(distance_data)
 
