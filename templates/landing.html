@@ -218,7 +218,7 @@
                 var timeAirborne = timeToMax + timeFromMaxToGround;
 
                 // Calculating Wind Force
-                var dragCoefficient = 0.49;
+                var dragCoefficient = 0.2 + 0.58 * (relativeAngle / 360);
                 var dragForce = 0.5 * 1.225 * windSpeed * 0.313 * dragCoefficient;
                 var windAcceleration = dragForce / 0.4;
 
