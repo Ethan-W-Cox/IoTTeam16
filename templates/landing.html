@@ -94,6 +94,7 @@
         <p id="heading">Heading: </p>
         <p id="distanceNoWind">Distance Without Wind (meters): </p>
         <p id="distanceWithWind">Distance With Wind (meters): </p>
+        <p id="driftWithWind">Distance Drifted (meters):</p>
     </div>
 </div>
 
@@ -101,7 +102,7 @@
     var sum = 0; // sum of wind speeds
     var average = 0; // average of wind speeds
     let finalDistance = 0;
-    var windFactor = 0;
+    let driftDistance = 0;
     var a = 0;
     var b = 0;
     var c = 0;
@@ -206,6 +207,7 @@
                 var relativeAngle = ((heading - ballDirection) + 360) % 360;
                 var windAngleRadians = relativeAngle * Math.PI / 180;
                 var windXComponent = average * Math.cos(windAngleRadians);
+                var windYComponent = average * Math.sin(windAngleRadians);
 
                 // Finding Wind Component Against Ball Movement
                 var windSpeed = windXComponent;
@@ -222,10 +224,23 @@
                 var dragForce = 0.5 * 1.225 * windSpeed * 0.313 * dragCoefficient;
                 var windAcceleration = dragForce / 0.4;
 
+                // Wind Drift Force
+                var driftDrag = 0.5 * 1.225 * windYComponent * 0.313 * dragCoefficient;
+                var windDriftAccel = driftDrag / 0.4;
+
                 // Final Distance Calculation
                 finalDistance = d - (0.5 * windAcceleration * (timeAirborne) ** 2);
+                driftDistance = 0.5 * windDriftAccel * (timeAirborne) ** 2;
+
+                // Drift Direction
+                var direction = " Right"
+                if(driftDistance < 0){
+                    direction = " Left"
+                }
+                driftDistance = Math.abs(driftDistance);
 
                 document.getElementById("distanceWithWind").innerHTML = "Distance With Wind (meters) : " + finalDistance.toFixed(2);
+                document.getElementById("driftWithWind").innerHTML = "Distance Drifted (meters) : " + driftDistance.toFixed(2) + direction;
             })
         fetch('/get_heading_data')
             .then(response => response.json())
