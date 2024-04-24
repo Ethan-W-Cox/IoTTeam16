@@ -5,6 +5,7 @@ html, body {
     display: flex;
     flex-direction: column;
     font-family: "Georgia", sans-serif;
+    background-image: url('Football_Background.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

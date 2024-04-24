@@ -2,8 +2,12 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+    background-image: url('Football_Background.png');
     background-color: #464646; /* Dark background */
     color: #fff; /* White text */
+    background-size: cover; /* This will stretch the background image to cover the entire screen */
+    background-repeat: no-repeat; /* Prevent the background image from repeating */
+    background-position: center; /* Center the background image */
 }
 
 h1 {
