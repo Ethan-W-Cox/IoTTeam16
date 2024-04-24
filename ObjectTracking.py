@@ -30,11 +30,14 @@ def writeThrowToDatabase(data):
     ref = db.reference('Throw Data')
 
     # Write data to Firebase
+    # Write data to Firebase
     ref.set({
-        'a': data[0],
-        'b': data[1],
-        'c': data[2],
-        'd': data[3]
+        'a' : data[0],
+        'b' : data[1],
+        'c' : data[2],
+        'd' : data[3],
+        'angle' : data[4],
+        'v' :  data[5]
     })
     return
 
@@ -132,8 +135,11 @@ def track(inputFile, startPixel, stopPixel):
     b_conv = model_conv[1]
     c_conv = model_conv[0]
     distance = calcDistance(a_conv, b_conv, c_conv)
+    launch_angle = np.rad2deg(np.arctan(b_conv))
+    launch_angle_rad = np.deg2rad(launch_angle)
+    launch_velocity = np.sqrt(-9.81/2/a_conv/np.cos(launch_angle_rad)/np.cos(launch_angle_rad))
 
-    return [a_conv, b_conv, c_conv, distance]
+    return [a_conv, b_conv, c_conv, distance, launch_angle, launch_velocity]
 
 def get_wind_direction(latitude, longitude, api_key):
     url = f"https://api.openweathermap.org/data/3.0/onecall?lat={latitude}&lon={longitude}&appid={api_key}"
@@ -158,19 +164,4 @@ modelParams = track(inputFile, startPixel, stopPixel)
 
 writeThrowToDatabase(modelParams)
 
-print(modelParams)
-
-
-# Example usage: Iowa City
-latitude = 41.6578
-longitude = -91.5346
-api_key = "2d6064c316de6cb90a1c735ea4a312bc"
-
-wind_direction = get_wind_direction(latitude, longitude, api_key)
-writeWindToDatabase(wind_direction)
-   
-
-
-
-    
-    
+print(modelParams)    
