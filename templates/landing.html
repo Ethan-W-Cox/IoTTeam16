@@ -233,9 +233,9 @@
                 driftDistance = 0.5 * windDriftAccel * (timeAirborne) ** 2;
 
                 // Drift Direction
-                var direction = " Right"
+                var direction = " Left"
                 if(driftDistance < 0){
-                    direction = " Left"
+                    direction = " Right"
                 }
                 driftDistance = Math.abs(driftDistance);
 
