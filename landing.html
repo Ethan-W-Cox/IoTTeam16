@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="static/landingStyle.css">
+    <title>AERO ARC</title>
+    <style>
+        .btn {
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Add styles for the table */
+        table, th, td {
+            border: 1px solid rgb(255, 255, 255);
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+<h1>AERO ARC</h1>
+<p style="text-align:center">Please select the direction you are throwing:</p>
+<div style="text-align:center">
+    <button class="btn" id="N">N</button>
+    <button class="btn" id="S">S</button>
+    <button class="btn" id="E">E</button>
+    <button class="btn" id="W">W</button>
+</div>
+<div style="text-align:center">
+    <input type="number" step="any" id="latitude" name="latitude" placeholder="Enter Latitude">
+    <input type="number" step="any" id="longitude" name="longitude" placeholder="Enter Longitude">
+</div>
+
+
+<p></p>
+<div style="text-align:center">
+    <button class="btn1" id="run">Collect Data</button>
+</div>
+<h2 style="text-align:left">Wind speed over the last 5 seconds:</h2>
+<div class="container"> 
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>Time (s)</th>
+                <th>Wind Speed (m/s)</th>
+            </tr>
+            <tr>
+                <td>0.0</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>0.5</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>1.0</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>1.5</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>2.0</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>2.5</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>3.0</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>3.5</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>4.0</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>4.5</td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+    <p></p>
+    <div class="data-container">
+        <p></p>
+        <p id="velocity">Inital Velocity (m/s): </p>
+        <p id="angle">Lanuch Angle: </p>
+        <p id="average">Average Wind Speed (m/s): </p>
+        <p id="heading">Heading: </p>
+        <p id="distanceNoWind">Distance Without Wind (meters): </p>
+        <p id="distanceWithWind"><span class="highlight">Distance With Wind (meters): </span></p>
+        <p id="driftWithWind"><span class="highlight">Distance Drifted (meters): </span></p>
+    </div>
+</div>
+
+<script>
+    var sum = 0; // sum of wind speeds
+    var average = 0; // average of wind speeds
+    let finalDistance = 0;
+    var windFactor = 0;
+    var a = 0;
+    var b = 0;
+    var c = 0;
+    var d = 0;
+    var heading = 0;
+    let driftDistance = 0;
+    var btns = document.getElementsByClassName("btn");
+
+    // Get the buttons
+    var btnN = document.getElementById("N");
+    var btnS = document.getElementById("S");
+    var btnE = document.getElementById("E");
+    var btnW = document.getElementById("W");
+    var btnRun = document.getElementById("run");
+
+    // Initially disable the "Collect Data" button
+    btnRun.disabled = true;
+
+    // Add event listeners to the direction buttons
+    btnN.addEventListener("click", handleDirectionButtonClick);
+    btnS.addEventListener("click", handleDirectionButtonClick);
+    btnE.addEventListener("click", handleDirectionButtonClick);
+    btnW.addEventListener("click", handleDirectionButtonClick);
+
+    function handleDirectionButtonClick() {
+        // Remove the "active" class from the currently active button, if there is one
+        var current = document.querySelector(".btn.active");
+        if (current) {
+            current.classList.remove("active");
+        }
+
+        // Add the "active" class to the clicked button
+        this.classList.add("active");
+
+        // Enable the "Collect Data" button
+        btnRun.disabled = false;
+    }
+
+    // Add event listener to the "Collect Data" button
+    btnRun.addEventListener("click", function () {
+        // Check if a direction button is selected
+        if (!document.querySelector(".btn.active")) {
+            // If not, show a popup and return
+            alert("Please select a direction before collecting data.");
+            return;
+        }
+    });
+
+    
+
+    for (var i = 0; i < btns.length; i++) {
+        btns[i].addEventListener("click", function () {
+            var current = document.getElementsByClassName("active");
+            if (current.length > 0) {
+                current[0].className = current[0].className.replace(" active", "");
+            }
+            this.className += " active";
+        });
+    }
+
+    document.getElementById("run").addEventListener("click", function () {
+
+        // get values from inputs for lat and long
+        var latitude = document.getElementById('latitude').value;
+        var longitude = document.getElementById('longitude').value;
+        console.log(latitude);
+        console.log(longitude);
+
+        fetch('/run', {method: 'POST'});
+        document.getElementById("run").innerHTML = "Please Wait"; // change button text
+        // Start updating the table
+        fetch('/get_wind_data')
+            .then(response => response.json())
+            .then(windSpeeds => {
+                // Get the table
+                var table = document.querySelector('table');
+                var activeButton = document.querySelector(".btn.active");
+
+                // Clear the table
+                while (table.rows.length > 1) {
+                    table.deleteRow(1);
+                }
+
+                sum = 0;
+                // For each wind speed, add a row to the table
+                for (var i = 0; i < windSpeeds.length; i++) {
+                    sum = sum + parseFloat(windSpeeds[i][1]);
+                    var row = table.insertRow(-1);
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    cell1.innerHTML = i * 0.5;
+                    cell2.innerHTML = windSpeeds[i][1];
+                }
+                average = sum / 10.0;
+                document.getElementById("average").innerHTML = "Average Wind Speed (m/s): " + average.toFixed(2);
+                document.getElementById("run").innerHTML = "Collect Data"; // change button text
+                heading = parseFloat(heading);
+
+                var ballDirection = 0;
+
+                if (activeButton.id === "E") {
+                    ballDirection = 90;
+                } else if (activeButton.id === "S") {
+                    ballDirection = 180;
+                } else if (activeButton.id === "W") {
+                    ballDirection = 270;
+                } else {
+                    ballDirection = 0;
+                }
+                // Finding Wind Angle Relative to the Ball
+                var relativeAngle = ((heading - ballDirection) + 360) % 360;
+                var windAngleRadians = relativeAngle * Math.PI / 180;
+                var windXComponent = average * Math.cos(windAngleRadians);
+                var windYComponent = average * Math.sin(windAngleRadians);
+
+                // Finding Wind Component Against Ball Movement
+                var windSpeed = windXComponent;
+
+                // Finding Time Airborne
+                var maxHeightPos = (-b/(2 * a));
+                var maxArcHeight = a * (maxHeightPos) ** 2 + b * (maxHeightPos) + c;
+                var timeToMax = (2 * (maxArcHeight - c) / 9.81) ** (0.5);
+                var timeFromMaxToGround = (2 * (maxArcHeight) / 9.81) ** (0.5);
+                var timeAirborne = timeToMax + timeFromMaxToGround;
+                console.log(timeAirborne);
+
+                // Calculating Wind Force
+                var normalizedAngle = Math.abs((relativeAngle - 180) % 360) / 180;
+                var dragCoefficient = 0.2 + 0.58 * normalizedAngle;
+                var dragForce = 0.5 * 1.225 * windSpeed * 0.313 * dragCoefficient;
+                var windAcceleration = dragForce / 0.4;
+
+                // Wind Drift Force
+                var driftDrag = 0.5 * 1.225 * windYComponent * 0.313 * dragCoefficient;
+                var windDriftAccel = driftDrag / 0.4;
+
+                // Final Distance Calculation
+                finalDistance = d - (0.5 * windAcceleration * (timeAirborne) ** 2);
+                driftDistance = 0.5 * Math.abs(windDriftAccel) * (timeAirborne) ** 2;
+
+                // Drift Direction
+                var direction = " Left"
+                if(driftDrag < 0){
+                    direction = " Right"
+                }
+
+                document.getElementById("distanceWithWind").innerHTML = "Distance With Wind (meters) : " + finalDistance.toFixed(2);
+                document.getElementById("driftWithWind").innerHTML = "Distance Drifted (meters) : " + driftDistance.toFixed(2) + direction;
+            })
+
+        fetch('/get_distance_data')
+            .then(response => response.json())
+            .then(distance => {
+                d = parseFloat(distance.d);
+                a = parseFloat(distance.a);
+                b = parseFloat(distance.b);
+                c = parseFloat(distance.c);
+                document.getElementById("distanceNoWind").innerHTML = "Distance Without Wind (meters) : " + d.toFixed(2);
+            })
+
+        fetch('/get_velocity_data')
+            .then(response => response.json())
+            .then(velo => {
+            velocity = parseFloat(velo.v);
+            document.getElementById("velocity").innerHTML = "Initial velocity (m/s): " + velocity.toFixed(2);
+            })
+
+        fetch('/get_angle_data')
+            .then(response => response.json())
+            .then(ang => {
+            angle = parseFloat(ang.angle);
+            document.getElementById("angle").innerHTML = "Launch Angle: " + angle.toFixed(2);
+            })
+
+        fetch('/get_wind_direction', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({latitude: latitude, longitude: longitude}),
+        })
+        .then(response => response.json())
+        .then(windDirection => {
+            console.log('Wind Direction:', windDirection);
+            heading = windDirection;
+            // You can now use the windDirection in your code
+            document.getElementById("heading").innerHTML = "Heading: " + windDirection;
+        })
+
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+</script>
+</body>
+</html>
