@@ -220,7 +220,8 @@
                 var timeAirborne = timeToMax + timeFromMaxToGround;
 
                 // Calculating Wind Force
-                var dragCoefficient = 0.2 + 0.58 * ((0.5 * Math.cos(relativeAngle)) + 0.5);
+                var normalizedAngle = Math.abs((relativeAngle - 180) % 360) / 180;
+                var dragCoefficient = 0.2 + 0.58 * normalizedAngle;
                 var dragForce = 0.5 * 1.225 * windSpeed * 0.313 * dragCoefficient;
                 var windAcceleration = dragForce / 0.4;
 
@@ -230,14 +231,13 @@
 
                 // Final Distance Calculation
                 finalDistance = d - (0.5 * windAcceleration * (timeAirborne) ** 2);
-                driftDistance = 0.5 * windDriftAccel * (timeAirborne) ** 2;
+                driftDistance = 0.5 * Math.abs(windDriftAccel) * (timeAirborne) ** 2;
 
                 // Drift Direction
                 var direction = " Left"
-                if(driftDistance < 0){
+                if(driftDrag < 0){
                     direction = " Right"
                 }
-                driftDistance = Math.abs(driftDistance);
 
                 document.getElementById("distanceWithWind").innerHTML = "Distance With Wind (meters) : " + finalDistance.toFixed(2);
                 document.getElementById("driftWithWind").innerHTML = "Distance Drifted (meters) : " + driftDistance.toFixed(2) + direction;
